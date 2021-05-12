@@ -2,11 +2,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include "getch.h"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <errno.h>
 
 FILE *fp1,*fp2,*fp;
+DIR *dir1;
 char fn[20],c;
 char t[4]=".txt";
 int m;
+char newline;
 
 void Crear()
 {
@@ -142,33 +149,166 @@ void Append()
 	end3: fclose(fp1);
 }
 
+void createDirectory()
+{
+    char name[100];
+    printf("Ingrese el nombre de la carpeta: ");
+    scanf("%s", name);
+    scanf("%c", &newline);
+    
+    // create a directory
+    // mkdir(nombre,permisos de usuario)
+    // 777 todos puedener leer, editar
+    mkdir(name,0777);
+
+    printf("Carpeta %s creada.\n", name);
+}
+
+void eliminateDirectory()
+{
+    char name[100];
+    printf("Ingrese el nombre de la carpeta: ");
+    scanf("%s", name);
+    scanf("%c", &newline);
+    dir1=opendir(name);
+    
+     if(dir1!=NULL)
+     {
+	// delete a directory
+    	rmdir(name);
+    	printf("Carpeta %s eliminada.\n", name);
+     }
+     else
+     {
+	printf("La carpeta no existe");
+     }
+}
+
+void _ls(const char *dir,int op_a,int op_l)
+{
+    struct dirent *d;
+    DIR *dh = opendir(dir);
+
+    if (!dh)
+	{
+		if (errno = ENOENT)
+		{
+			//Si no se encuentra el directorio
+			perror("No existe el directorio");
+		}
+		else
+		{
+			//si el directorio no se puede leer 
+			perror("No se pudo leer el directorio");
+		}
+		exit(EXIT_FAILURE);
+	}
+    while ((d = readdir(dh)) != NULL)
+	{
+		//Si hay archivos ocultos continuamos 
+		if (!op_a && d->d_name[0] == '.')
+			continue;
+		printf("%s  ", d->d_name);
+		if(op_l) printf("\n");
+	}
+
+}
+
+
+void openDirectory()
+{
+    struct dirent *ent;
+    char name[100];
+    char o;
+    int opc,opc1;
+    printf("Ingrese el nombre de la carpeta:");
+    scanf("%s", name);
+    scanf("%c", &newline);
+    dir1=opendir(name);
+    
+
+    if(dir1==NULL)
+	{
+	   printf("Error al abrir carpeta\n");
+	}
+
+    printf("Carpeta %s abierta.\n",name);
+    _ls(name,0,0);
+    printf("¿Quiere crear un archivo dentro de esta carpeta?\n");
+    printf("[S]i\n[N]o\n");
+    scanf("%c",&o);
+    if(o=='S' || o=='s')
+    {
+	//falta que el archivo se guarde en esta carpeta y no por fuera 
+        Crear();
+    }else if(o=='N' || o=='n')
+    {
+	printf("¿Quiere eliminar un archivo dentro de esta carpeta?\n");
+	printf("Presione 1 para eliminar, 2 en caso contrario\n");
+        scanf("%d",&opc);
+	if(opc==1){
+	    Eliminar();
+	}else if(opc==2){
+	   printf("¿Quiere crear una carpeta dentro de esta carpeta?\n");
+	   printf("Presione 1 para crear otra carpeta, 2 en caso contrario\n");
+           scanf("%d",&opc1);
+	   if(opc1==1){
+	       //falta que el directorio se cree en esta carpeta y no por fuera 
+	    	createDirectory();
+	   }else if(opc1==2){
+	   	printf("Entonces eliminaremos una carpeta dentro de esta carpeta\n");
+		eliminateDirectory(); 
+	   }		
+	}
+    }else{
+	printf("Opcion no valida\n");
+    }
+    printf("\n");
+    printf("Ahora tiene lo siguiente dentro de la carpeta %s \n",name);
+    _ls(name,0,0);
+    closedir(dir1);
+   
+}
+
 void main()
 {
   do 
   {
     printf("\n\nPRACTICA 8\n\n");
-    printf("\n1.CREAR\n2.VER\n3.APPEND\n4.ELIMINAR\n5.SALIR\n");
+    printf("\n1.CREAR DIRECTORIO\n2.CREAR ARCHIVO\n3.VER ARCHIVO\n4.VER DIRECTORIO\n5.APPEND\n6.ELIMINAR ARCHIVO\n7.ELIMINAR DIRECTORIO\n8.SALIR\n");
     printf("\nIngresa numero: ");
     scanf("%d",&m);
     switch(m)
     {
       case 1:
+	createDirectory();
+	break;
+
+      case 2:
         Crear();
         break;
 
-      case 2:
+      case 3:
         Ver();
         break;
+      
+      case 4:
+	openDirectory();
+	break;
 
-      case 3:
+      case 5:
         Append();
         break;
 
-      case 4:
+      case 6:
         Eliminar();
         break;
 
-      case 5:
+      case 7:
+	eliminateDirectory();
+	break;
+
+      case 8:
         exit(0);
     }
   }while(1);
