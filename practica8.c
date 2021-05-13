@@ -7,27 +7,53 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <errno.h>
+#include <assert.h>
 
 FILE *fp1,*fp2,*fp;
 DIR *dir1;
-char fn[20],c;
-char t[4]=".txt";
+char fn[100],c;
+char t[5]=".txt";
 int m;
 char newline;
 
-void Crear()
+void Crear(char path[500])
 {
+  	long n;
+    char *buf;
+
+    n = pathconf(".", _PC_PATH_MAX);
+    assert(n != -1);
+    buf = malloc(n * sizeof(*buf));
+	// Guardamos la dirección actual de la computadora
+	// es similar al pwd
+    assert(buf);
+	if (getcwd(buf, n) == NULL) {
+        perror("getcwd");
+        exit(EXIT_FAILURE);
+    }
   printf("\nIngresa nombre del archivo: ");
   scanf("%s",fn);
-  strcat(fn,t);
-  fp1=fopen(fn,"w");
-  printf("\nIngresa el contenido y ` para guardar.\n");
+  strcat(fn,t);	// nombre.txt
+  // Anteponemos '/' para poder direccionar correctamente
+  // la dirección de la carpeta y archivo
+  if(path[0] != '/' || path[0] != '\0'){
+	  strcat(buf,"/");
+  }
+  strcat(buf,path);
+  strcat(buf,"/");
+  strcat(buf,fn);
+  // Aqui ya se guarda la dirección de guardado completa
+  // "directorio/completo/para/guardar/archivo.txt"
+  fp1=fopen(buf,"w");
+  // Cambiar a otro caracter que no se use demasiado y que sea facil
+  // de ingresar (el cero esta temporal, cambiarlo)
+  printf("\nIngresa el contenido y '0' para guardar.\n");
 
   while(1)
 	{
 		c=getch();
 		
-		if(c==96)
+		if(c=='0')
 			goto end1;
 		
 		if(c==13)
@@ -208,7 +234,7 @@ void _ls(const char *dir,int op_a,int op_l)
 		//Si hay archivos ocultos continuamos 
 		if (!op_a && d->d_name[0] == '.')
 			continue;
-		printf("%s  ", d->d_name);
+		printf("%s\n", d->d_name);
 		if(op_l) printf("\n");
 	}
 
@@ -235,12 +261,13 @@ void openDirectory()
     printf("Carpeta %s abierta.\n",name);
     _ls(name,0,0);
     printf("¿Quiere crear un archivo dentro de esta carpeta?\n");
-    printf("[S]i\n[N]o\n");
+    printf("[S]i\t[N]o\n");
     scanf("%c",&o);
+
     if(o=='S' || o=='s')
     {
-	//falta que el archivo se guarde en esta carpeta y no por fuera 
-        Crear();
+		// Se le pasa como parámetro el nombre de la carpeta
+        Crear(name);
     }else if(o=='N' || o=='n')
     {
 	printf("¿Quiere eliminar un archivo dentro de esta carpeta?\n");
@@ -285,7 +312,10 @@ void main()
 	break;
 
       case 2:
-        Crear();
+	  	// Solo se le pasa el parametro de la barra
+		// Indicando que el archivo se creará
+		// En la carpeta raiz del programa ejecutado
+        Crear("/");
         break;
 
       case 3:
@@ -313,4 +343,5 @@ void main()
     }
   }while(1);
 }
+
 
