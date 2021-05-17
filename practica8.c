@@ -99,12 +99,32 @@ void Ver()
 }
 	
  
-void Eliminar()
+void Eliminar(char path[500])
 {
+	long n;
+    char *buf;
+    n = pathconf(".", _PC_PATH_MAX);
+    assert(n != -1);
+    buf = malloc(n * sizeof(*buf));
+    assert(buf);
+	
+	if (getcwd(buf, n) == NULL) 
+	{
+        perror("error");
+        exit(EXIT_FAILURE);
+    	}
 	printf("\nIngresa nombre del archivo: ");
 	scanf("%s",fn);
-	strcat(fn,t);
-	fp1=fopen(fn,"r");
+	strcat(fn,t);	
+	if(path[0] != '/' || path[0] != '\0')
+	{
+		strcat(buf,"/");
+	}
+	strcat(buf,path);
+	strcat(buf,"/");
+	strcat(buf,fn);
+
+	fp1=fopen(buf,"r");
 	
 	if(fp1==NULL)
 	{
@@ -114,7 +134,7 @@ void Eliminar()
 	
 	fclose(fp1);
 	
-	if(remove(fn)==0)
+	if(remove(buf)==0)
 	{
 		printf("\n\nArchivo Eliminado");
 		goto end2;
@@ -274,7 +294,7 @@ void openDirectory()
 	printf("Presione 1 para eliminar, 2 en caso contrario\n");
         scanf("%d",&opc);
 	if(opc==1){
-	    Eliminar();
+	    Eliminar("/");
 	}else if(opc==2){
 	   printf("¿Quiere crear una carpeta dentro de esta carpeta?\n");
 	   printf("Presione 1 para crear otra carpeta, 2 en caso contrario\n");
@@ -331,7 +351,7 @@ void main()
         break;
 
       case 6:
-        Eliminar();
+        Eliminar("/");
         break;
 
       case 7:
