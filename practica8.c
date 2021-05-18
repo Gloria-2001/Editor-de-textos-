@@ -18,7 +18,7 @@ char newline;
 
 void Crear(char path[500])
 {
-  	long n;
+    long n;
     char *buf;
 
     n = pathconf(".", _PC_PATH_MAX);
@@ -46,7 +46,7 @@ void Crear(char path[500])
   // "directorio/completo/para/guardar/archivo.txt"
   fp1=fopen(buf,"w");
   // Cambiar a otro caracter que no se use demasiado y que sea facil
-  // de ingresar (el cero esta temporal, cambiarlo)
+  // de ingresar 
   printf("\nIngresa el contenido y '0' para guardar.\n");
 
   while(1)
@@ -73,11 +73,34 @@ void Crear(char path[500])
 	end1: fclose(fp1);
 }
 
-void Ver()
+void Ver(char path[500])
 {
+	long n;
+    	char *buf;
+
+    	n = pathconf(".", _PC_PATH_MAX);
+    	assert(n != -1);
+    	buf = malloc(n * sizeof(*buf));	
+	assert(buf);
+
+	if (getcwd(buf, n) == NULL) {
+        	perror("getcwd");
+        	exit(EXIT_FAILURE);
+   	}
+
+
 	printf("\nIngresa nombre del archivo: ");
 	scanf("%s",fn);
-	strcat(fn,t);
+      	strcat(fn,t);
+	
+
+	if(path[0] != '/' || path[0] != '\0'){
+	  strcat(buf,"/");
+ 	}
+  	strcat(buf,path);
+  	strcat(buf,"/");
+  	strcat(buf,fn);
+
 	fp1=fopen(fn,"r");
 	
 	if(fp1==NULL)
@@ -195,39 +218,39 @@ void Append()
 	end3: fclose(fp1);
 }
 
-void createDirectory()
+void createDirectory(char path[500])
 {
+    long n;
+    char *buf;
+    n = pathconf(".", _PC_PATH_MAX);
+    assert(n != -1);
+    buf = malloc(n * sizeof(*buf));
+    assert(buf);
+    
+    assert(buf);
+	if (getcwd(buf, n) == NULL) {
+        perror("getcwd");
+        exit(EXIT_FAILURE);
+    }
+    
     char name[100];
     printf("Ingrese el nombre de la carpeta: ");
     scanf("%s", name);
     scanf("%c", &newline);
+
+    if(path[0] != '/' || path[0] != '\0'){
+	  strcat(buf,"/");
+    }
+     
+    strcat(buf,path);
+    strcat(buf,"/");
+    strcat(buf,name);	
     
     // create a directory
     // mkdir(nombre,permisos de usuario)
     // 777 todos puedener leer, editar
     mkdir(name,0777);
-
     printf("Carpeta %s creada.\n", name);
-}
-
-void eliminateDirectory()
-{
-    char name[100];
-    printf("Ingrese el nombre de la carpeta: ");
-    scanf("%s", name);
-    scanf("%c", &newline);
-    dir1=opendir(name);
-    
-     if(dir1!=NULL)
-     {
-	// delete a directory
-    	rmdir(name);
-    	printf("Carpeta %s eliminada.\n", name);
-     }
-     else
-     {
-	printf("La carpeta no existe");
-     }
 }
 
 void _ls(const char *dir,int op_a,int op_l)
@@ -260,13 +283,43 @@ void _ls(const char *dir,int op_a,int op_l)
 
 }
 
+void eliminateDirectory()
+{
+    char name[100],o;
+     char inst[100];
+
+    printf("Ingrese el nombre de la carpeta: ");
+    scanf("%s", name);
+    scanf("%c", &newline);
+    dir1=opendir(name);
+   
+     if(dir1!=NULL)
+     {
+        printf("Esto es lo que tiene actualmente en la carpeta:\n");
+        _ls(name,0,0);
+        printf("¿Desea Continuar?");
+        printf("[S]i\t[N]o\n");
+        scanf("%c",&o);
+	if(o=='S' || o=='s'){
+	   // delete a directory
+	   sprintf(inst,"rm -rf %s",name);
+    	   system(inst);
+    	   printf("Carpeta %s eliminada.\n", name);
+        }else{
+	   printf("La carpeta no se eliminará\n"); 
+	}      
+     }
+     else
+     {
+	printf("La carpeta no existe");
+     }
+}
 
 void openDirectory()
 {
-    struct dirent *ent;
     char name[100];
     char o;
-    int opc,opc1;
+    int opc;
     printf("Ingrese el nombre de la carpeta:");
     scanf("%s", name);
     scanf("%c", &newline);
@@ -286,26 +339,18 @@ void openDirectory()
 
     if(o=='S' || o=='s')
     {
-		// Se le pasa como parámetro el nombre de la carpeta
+	// Se le pasa como parámetro el nombre de la carpeta
         Crear(name);
     }else if(o=='N' || o=='n')
     {
-	printf("¿Quiere eliminar un archivo dentro de esta carpeta?\n");
-	printf("Presione 1 para eliminar, 2 en caso contrario\n");
-        scanf("%d",&opc);
-	if(opc==1){
-	    Eliminar("/");
+	printf("¿Quiere ver un archivo dentro de esta carpeta?\n");
+        printf("Presione 1 para ver un archivo. En caso contrario presione 2\n");
+        scanf("%d",&opc);   
+	if(opc==1)
+	{
+	    Ver("/");            
 	}else if(opc==2){
-	   printf("¿Quiere crear una carpeta dentro de esta carpeta?\n");
-	   printf("Presione 1 para crear otra carpeta, 2 en caso contrario\n");
-           scanf("%d",&opc1);
-	   if(opc1==1){
-	       //falta que el directorio se cree en esta carpeta y no por fuera 
-	    	createDirectory();
-	   }else if(opc1==2){
-	   	printf("Entonces eliminaremos una carpeta dentro de esta carpeta\n");
-		eliminateDirectory(); 
-	   }		
+	   printf("No se hará alguna acción\n"); 
 	}
     }else{
 	printf("Opcion no valida\n");
@@ -328,7 +373,7 @@ void main()
     switch(m)
     {
       case 1:
-	createDirectory();
+	createDirectory("/");
 	break;
 
       case 2:
@@ -339,7 +384,7 @@ void main()
         break;
 
       case 3:
-        Ver();
+        Ver("/");
         break;
       
       case 4:
