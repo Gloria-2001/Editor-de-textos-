@@ -11,8 +11,9 @@
 
 FILE *fp1,*fp2,*fp;
 DIR *dir1;
-char fn[100],c;
+char fn[50],dn[50],*path,c;
 char t[5]=".txt";
+char cwd[BUFSIZ];
 int m;
 char newline;
 
@@ -73,39 +74,23 @@ void Crear(char path[500])
 	end1: fclose(fp1);
 }
 
-void Ver(char path[500])
+void Ver()
 {
-	long n;
-    	char *buf;
-
-    	n = pathconf(".", _PC_PATH_MAX);
-    	assert(n != -1);
-    	buf = malloc(n * sizeof(*buf));	
-	assert(buf);
-
-	if (getcwd(buf, n) == NULL) {
-        	perror("getcwd");
-        	exit(EXIT_FAILURE);
-   	}
-
-
+	path = getcwd(NULL, BUFSIZ);  //obtener directorio actual
+	printf("\nIngresa nombre del directorio: ");  
+	scanf("%s",dn);  
+	strcat(path,"/");
+	strcat(path,dn);
+	strcat(path,"/");  //con esto tendria como /home/usuraio/nombrededirectoroio/
 	printf("\nIngresa nombre del archivo: ");
 	scanf("%s",fn);
-      	strcat(fn,t);
-	
+	strcat(path,fn);
+	strcat(path,t); //con esto tendria completo /home/usuraio/nombrededirectoroio/texto.txt
+	fp1=fopen(path,"r");
 
-	if(path[0] != '/' || path[0] != '\0'){
-	  strcat(buf,"/");
- 	}
-  	strcat(buf,path);
-  	strcat(buf,"/");
-  	strcat(buf,fn);
-
-	fp1=fopen(fn,"r");
-	
 	if(fp1==NULL)
 	{
-		printf("\nNo Existe");
+		perror("\nNo Existe");
 		goto end1;
 	}
 		
@@ -172,10 +157,19 @@ void Eliminar(char path[500])
  
 void Append()
 {
+	/*igual que hizo en funcion VER*/
+	path = getcwd(NULL, BUFSIZ);      
+	printf("\nIngresa nombre del directorio: ");
+	scanf("%s",dn);
+	strcat(path,"/");
+	strcat(path,dn);
+	strcat(path,"/");
 	printf("\nIngresa nombre del archivo: ");
 	scanf("%s",fn);
-	strcat(fn,t);
-	fp1=fopen(fn,"r");
+	strcat(path,fn);
+	strcat(path,t);
+ 	
+	fp1=fopen(path,"r");
 	
 	if(fp1==NULL)
 	{
@@ -191,14 +185,14 @@ void Append()
 	}
 	
 	fclose(fp1);
-	printf("\nIngresa el contenido y `para guardar.\n");
-	fp1=fopen(fn,"a");
+	printf("\nIngresa el contenido y 0 para guardar.\n");
+	fp1=fopen(path,"a");
 	
 	while(1)
 	{
 		c=getch();
 		
-		if(c==19)
+		if(c=='0')
 			goto end3;
 		
 		if(c==13)
@@ -384,7 +378,7 @@ void main()
         break;
 
       case 3:
-        Ver("/");
+        Ver();
         break;
       
       case 4:
