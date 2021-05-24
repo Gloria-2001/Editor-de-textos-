@@ -79,7 +79,7 @@ void Ver()
 	path = getcwd(NULL, BUFSIZ);  //obtener directorio actual
 	printf("\nIngresa nombre del directorio. Si quieres directorio actual, ingresa 0: ");  
 	scanf("%s",dn);
-	if(dn=='0');
+	if(*dn =='0')
 	{
 		strcat(path,"/");
 	}
@@ -169,7 +169,7 @@ void Append()
 	path = getcwd(NULL, BUFSIZ);  //obtener directorio actual
 	printf("\nIngresa nombre del directorio. Si quieres directorio actual, ingresa 0: ");  
 	scanf("%s",dn);
-	if(dn=='0');
+	if(*dn=='0')
 	{
 		strcat(path,"/");
 	}
