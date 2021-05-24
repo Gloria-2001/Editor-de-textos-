@@ -77,15 +77,23 @@ void Crear(char path[500])
 void Ver()
 {
 	path = getcwd(NULL, BUFSIZ);  //obtener directorio actual
-	printf("\nIngresa nombre del directorio: ");  
-	scanf("%s",dn);  
-	strcat(path,"/");
-	strcat(path,dn);
-	strcat(path,"/");  //con esto tendria como /home/usuraio/nombrededirectoroio/
+	printf("\nIngresa nombre del directorio. Si quieres directorio actual, ingresa 0: ");  
+	scanf("%s",dn);
+	if(dn=='0');
+	{
+		strcat(path,"/");
+	}
+	else
+	{
+		strcat(path,"/");
+		strcat(path,dn);
+		strcat(path,"/");  //con esto tendria como /home/usuraio/nombrededirectoroio/	
+	}
 	printf("\nIngresa nombre del archivo: ");
 	scanf("%s",fn);
 	strcat(path,fn);
-	strcat(path,t); //con esto tendria completo /home/usuraio/nombrededirectoroio/texto.txt
+	strcat(path,t);
+	 //con esto tendria completo /home/usuraio/nombrededirectoroio/texto.txt
 	fp1=fopen(path,"r");
 
 	if(fp1==NULL)
@@ -158,12 +166,19 @@ void Eliminar(char path[500])
 void Append()
 {
 	/*igual que hizo en funcion VER*/
-	path = getcwd(NULL, BUFSIZ);      
-	printf("\nIngresa nombre del directorio: ");
+	path = getcwd(NULL, BUFSIZ);  //obtener directorio actual
+	printf("\nIngresa nombre del directorio. Si quieres directorio actual, ingresa 0: ");  
 	scanf("%s",dn);
-	strcat(path,"/");
-	strcat(path,dn);
-	strcat(path,"/");
+	if(dn=='0');
+	{
+		strcat(path,"/");
+	}
+	else
+	{
+		strcat(path,"/");
+		strcat(path,dn);
+		strcat(path,"/");  //con esto tendria como /home/usuraio/nombrededirectoroio/	
+	}
 	printf("\nIngresa nombre del archivo: ");
 	scanf("%s",fn);
 	strcat(path,fn);
